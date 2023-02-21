@@ -19,7 +19,7 @@ export const characterRoute: RouteRecordRaw = {
       path: 'list',
       name: 'character-id',
       component: CharacterList,
-      props: {title: 'Lista', visible: true}
+      props: {title: 'Character List', visible: true}
     },
     {
       path: 'search',
