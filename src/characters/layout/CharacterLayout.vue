@@ -23,9 +23,9 @@
     :links="routeLinks"
   />
   <!-- RouterView + Suspense -->
-  <Suspense>
-    <RouterView />
-  </Suspense>
+  <!-- <Suspense> -->
+  <RouterView />
+  <!-- </Suspense> -->
 </template>
 
 <style scoped>

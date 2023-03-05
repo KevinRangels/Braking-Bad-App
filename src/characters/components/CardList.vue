@@ -1,10 +1,12 @@
 <script setup lang="ts">
-  import { ref } from 'vue'
-  import { useQuery} from '@tanstack/vue-query'
-  import rickAndMortyApi from '@/api/rickAndMortyApi'
-  import type { Character, Result } from '@/characters/interfaces/character'
+  // import { ref } from 'vue'
+  // import { useQuery} from '@tanstack/vue-query'
+  // import rickAndMortyApi from '@/api/rickAndMortyApi'
+  import type { Result } from '@/characters/interfaces/character'
   // import { useCharacters } from '@/characters/composables/useCharacters'
   import CharacterCard from '@/characters/components/CharacterCard.vue'
+
+  const props = defineProps<{characters: Result[]}>()
 
   // 1-Normal Suspense
   // const { data } = await rickAndMortyApi.get<Character>('/character')
@@ -15,30 +17,24 @@
   // const {isLoading, characters, hasError, errorMessage} = useCharacters()
 
   // 3- TanStack query
-  const getCharactersSlow = async():Promise<Result[]> => new Promise((resolve) => {
-    setTimeout(async() => {
-      const {data} = await rickAndMortyApi.get<Character>('/character')
-      const characters:Result[] = data.results
-      resolve(characters)
-      // return characters
+  // const getCharactersSlow = async():Promise<Result[]> => new Promise((resolve) => {
+  //   setTimeout(async() => {
+  //     const {data} = await rickAndMortyApi.get<Character>('/character')
+  //     const characters:Result[] = data.results
+  //     resolve(characters)
+  //     // return characters
         
-    }, 1000)
-  })
+  //   }, 1)
+  // })
 
-  const {isLoading, isError, data: characters, error} = useQuery(['characters'], getCharactersSlow, {
-    cacheTime: 1000 * 60,
-    refetchOnReconnect: 'always'
-  })
+  // const {isLoading, isError, data: characters, error} = useQuery(['characters'], getCharactersSlow)
   
 </script>
 
 <template>
-  <h1 v-if="isLoading">
-    Loading
-  </h1>
   <div class="card-list">
     <CharacterCard
-      v-for="character of characters"
+      v-for="character of props.characters"
       :key="character.id"
       :character="character"
     />
