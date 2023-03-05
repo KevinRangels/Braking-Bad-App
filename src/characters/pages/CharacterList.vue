@@ -1,4 +1,5 @@
 <script setup lang="ts">
+  import characterStore from '../../store/characters.store'
   import { useQuery } from '@tanstack/vue-query'
   import CardList from '@/characters/components/CardList.vue'
   import rickAndMortyApi from '@/api/rickAndMortyApi'
@@ -12,20 +13,23 @@
     return characters
   }        
 
-  const {isLoading, isError, data: characters, error} = useQuery(
+  const {isLoading, data} = useQuery(
     ['characters'], 
-    getCharacters
-    
+    getCharacters, {
+      onSuccess(data) {
+        characterStore.loadedCharacters(data)
+      }
+    }
   )
 
 </script>
 
 <template>
-  <h1 v-if="isLoading">
+  <h1 v-if="characterStore.characters.isLoading">
     Loading
   </h1>
   <h1>{{ props.title }}</h1>
-  <CardList :characters="characters || []" />
+  <CardList :characters="characterStore.characters.list" />
 </template>
 
 <style scoped>
