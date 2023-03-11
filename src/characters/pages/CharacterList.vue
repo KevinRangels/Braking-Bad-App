@@ -7,17 +7,26 @@
 
   const props = defineProps<{title: string, visible: boolean}>()
 
-  const getCharacters = async():Promise<Result[]> => {
-    const { data } = await rickAndMortyApi.get<Character>('/character')
+  const getCharactersCacheFirst = async():Promise<Result[]> => {
+
+    if (characterStore.characters.count > 0) {
+      return characterStore.characters.list
+    }
+
+    const { data } = await rickAndMortyApi.get<Character>('/character2')
     const characters:Result[] = data.results
     return characters
   }        
 
-  const {isLoading, data} = useQuery(
+  useQuery(
     ['characters'], 
-    getCharacters, {
+    getCharactersCacheFirst, {
       onSuccess(data) {
         characterStore.loadedCharacters(data)
+      },
+      onError(error) {
+        console.log('Error', error)
+        characterStore.loadedCharactersFailed('Error')
       }
     }
   )
@@ -28,8 +37,16 @@
   <h1 v-if="characterStore.characters.isLoading">
     Loading
   </h1>
-  <h1>{{ props.title }}</h1>
-  <CardList :characters="characterStore.characters.list" />
+
+  <div v-else-if="characterStore.characters.hasError">
+    <h1>Error al cargar</h1>
+    <p>{{ characterStore.characters.errorMessage }}</p>
+  </div>
+
+  <template v-else>
+    <h2>{{ props.title }}</h2>
+    <CardList :characters="characterStore.characters.list" />
+  </template>
 </template>
 
 <style scoped>

@@ -1,5 +1,7 @@
-import type { Result } from "@/characters/interfaces/character"
 import { reactive } from "vue"
+import rickAndMortyApi from "@/api/rickAndMortyApi"
+import type { Result } from "@/characters/interfaces/character"
+import type { Character } from '../characters/interfaces/character'
 
 interface Store {
     characters: {
@@ -26,11 +28,13 @@ const characterStore = reactive<Store>({
   },
 
   // Methods
-  startLoadingCharacters() {
-    // console.log('start loading character')
+  async startLoadingCharacters() {
+    const { data } = await rickAndMortyApi.get<Character>('/character')
+    const characters:Result[] = data.results
+    this.loadedCharacters(characters)
   },
   loadedCharacters(data: Result[]) {
-    this.characters.count = data.length
+   
     this.characters = {
       count: data.length,
       isLoading: false,
@@ -41,10 +45,17 @@ const characterStore = reactive<Store>({
     console.log('loadedCharacters', data)
   },
   loadedCharactersFailed(error: string) {
-    console.log('start loading character')
+    this.characters = {
+      count: 0,
+      errorMessage: error,
+      hasError: true,
+      isLoading: false,
+      list: []
+    }
   }
 })
 
+// Lo Podemos llamar asi como carga inicial de nuestra aplicacion
 characterStore.startLoadingCharacters()
 
 export default characterStore
