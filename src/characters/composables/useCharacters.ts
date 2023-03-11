@@ -1,46 +1,52 @@
-import axios from 'axios'
-import { onMounted, ref } from 'vue'
-import rickAndMortyApi from '@/api/rickAndMortyApi'
-import type { Character, Result } from '@/characters/interfaces/character'
+import rickAndMortyApi from "@/api/rickAndMortyApi"
+import { useQuery } from "@tanstack/vue-query"
+import { computed, ref } from "vue"
+import type { Result, Character } from "../interfaces/character"
 
 const characters = ref<Result[]>([])
-const isLoading = ref<boolean>(true)
 const hasError = ref<boolean>(false)
-const errorMessage = ref<string>('')
+const errorMessage = ref<string | null>(null)
 
-export const useCharacters = () => {
+const getCharacters = async():Promise<Result[]> => {
 
-  onMounted( async() => {
-    await loadCharacters()
-  })
-
-  const loadCharacters = async() => {
-
-    if(characters.value.length > 0) return
-
-    isLoading.value = true
-    try {
-      const { data } = await rickAndMortyApi.get<Character>('/character')
-      console.log('resp', {data})
-      characters.value = data.results
-      isLoading.value = false
-        
-    } catch (error) {
-      isLoading.value = false
-      hasError.value = true
-      if (axios.isAxiosError(error)) {
-        return errorMessage.value = error.message
-      }
-      errorMessage.value = JSON.stringify(error)
-    }
-    
+  if (characters.value.length > 0) {
+    return characters.value
   }
-  
 
+  const { data } = await rickAndMortyApi.get<Character>('/character')
+  const charactersData:Result[] = data.results
+  return charactersData
+}   
+
+const loadedCharacters = (data: Result[]) => {
+  characters.value = data
+  hasError.value = false
+  errorMessage.value = null
+
+}
+
+const useCharacters = () => {
+  const {isLoading} = useQuery(
+    ['characters'], 
+    getCharacters, {
+      onSuccess(data) {
+        loadedCharacters(data)
+      },
+      onError(error) {
+        console.log('Error', error)
+      }
+    }
+  )
+    
   return {
+    // Properties
     characters,
     isLoading,
     hasError,
-    errorMessage
-  }
-}
+    errorMessage,
+    //Getters
+    count: computed(() => characters.value.length)
+    // Methods
+  }}
+
+export default useCharacters
