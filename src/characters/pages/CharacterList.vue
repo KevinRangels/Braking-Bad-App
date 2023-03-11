@@ -13,7 +13,7 @@
       return characterStore.characters.list
     }
 
-    const { data } = await rickAndMortyApi.get<Character>('/character2')
+    const { data } = await rickAndMortyApi.get<Character>('/character')
     const characters:Result[] = data.results
     return characters
   }        
